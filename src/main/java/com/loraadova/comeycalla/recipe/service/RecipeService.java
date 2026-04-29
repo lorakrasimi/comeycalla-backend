@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class RecipeService {
@@ -155,6 +156,19 @@ public class RecipeService {
         List<RecipeResponse> recipeResponseList = new ArrayList<>();
         recipeList.forEach(recipe -> recipeResponseList.add(this.recipeMapper.toResponse(recipe)));
         return recipeResponseList;
+    }
+
+    public RecipeResponse getRandomRecipe() {
+        List<Recipe> result = recipeRepository.findByUserId(this.getCurrentUser().getId());
+
+        if (result.isEmpty()) {
+           return new RecipeResponse();
+        }
+
+        int index = new Random().nextInt(result.size());
+        Recipe randomRecipe = result.get(index);
+
+        return this.recipeMapper.toResponse(randomRecipe);
     }
 
 // // Obtener listado paginado (opcional filtro por texto)

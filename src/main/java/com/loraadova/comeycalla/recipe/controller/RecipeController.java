@@ -55,11 +55,14 @@ public class RecipeController {
         return ResponseEntity.ok().build();
     }
 
-
-    // (Opcional) GET /api/recipes/me
     @GetMapping("/last-recipes")
     ResponseEntity<List<RecipeResponse>> lastRecipes() {
         return ResponseEntity.ok(this.recipeService.getLastRecipes());
+    }
+
+    @GetMapping("/random-recipe")
+    ResponseEntity<RecipeResponse> randomRecipe() {
+        return ResponseEntity.ok(this.recipeService.getRandomRecipe());
     }
 
 }

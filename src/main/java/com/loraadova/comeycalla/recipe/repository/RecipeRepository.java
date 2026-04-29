@@ -14,4 +14,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     void deleteRecipeByIdAndUser_Id(Long id, Long user_id);
 
     List<Recipe> findTop10ByUserId(Long userId);
+
+    List<Recipe> findByUserId(Long userId);
 }
