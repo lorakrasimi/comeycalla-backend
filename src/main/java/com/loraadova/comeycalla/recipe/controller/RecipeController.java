@@ -4,11 +4,13 @@ import com.loraadova.comeycalla.recipe.dto.RecipeRequest;
 import com.loraadova.comeycalla.recipe.dto.RecipeResponse;
 import com.loraadova.comeycalla.recipe.service.RecipeService;
 import jakarta.validation.Valid;
-import org.hibernate.query.Page;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -54,12 +56,11 @@ public class RecipeController {
     }
 
 
-    // // (Opcional) GET /api/recipes/me
-    // ResponseEntity<Page<RecipeResponse>> findMyRecipes(
-    //         @RequestParam int page,
-    //         @RequestParam int size
-    // ) {
-    // }
-//
-    // ;
+    // (Opcional) GET /api/recipes/me
+    @GetMapping("/last-recipes")
+    ResponseEntity<List<RecipeResponse>> lastRecipes() {
+        return ResponseEntity.ok(this.recipeService.getLastRecipes());
+    }
+
 }
+

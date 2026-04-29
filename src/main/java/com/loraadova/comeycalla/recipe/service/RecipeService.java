@@ -19,6 +19,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class RecipeService {
     @Autowired
@@ -147,6 +150,12 @@ public class RecipeService {
         this.recipeRepository.deleteRecipeByIdAndUser_Id(id, this.getCurrentUser().getId());
     }
 
+    public List<RecipeResponse> getLastRecipes() {
+        List<Recipe> recipeList = this.recipeRepository.findTop10ByUserId(this.getCurrentUser().getId());
+        List<RecipeResponse> recipeResponseList = new ArrayList<>();
+        recipeList.forEach(recipe -> recipeResponseList.add(this.recipeMapper.toResponse(recipe)));
+        return recipeResponseList;
+    }
 
 // // Obtener listado paginado (opcional filtro por texto)
 // Page<RecipeResponse> findAll(Pageable pageable, String search){};
