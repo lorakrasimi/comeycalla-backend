@@ -17,6 +17,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -162,7 +164,7 @@ public class RecipeService {
         List<Recipe> result = recipeRepository.findByUserId(this.getCurrentUser().getId());
 
         if (result.isEmpty()) {
-           return new RecipeResponse();
+            return new RecipeResponse();
         }
 
         int index = new Random().nextInt(result.size());
@@ -171,10 +173,17 @@ public class RecipeService {
         return this.recipeMapper.toResponse(randomRecipe);
     }
 
-// // Obtener listado paginado (opcional filtro por texto)
-// Page<RecipeResponse> findAll(Pageable pageable, String search){};
+    public Page<RecipeResponse> findAll(
+            String search,
+            Integer maxTime,
+            Integer servings,
+            Pageable pageable
+    ) {
+        Long userId = this.getCurrentUser().getId();
 
-
-//// (Opcional) Obtener recetas del usuario
-// Page<RecipeResponse> findByUser(Long userId, Pageable pageable){};
+        return recipeRepository
+                .findRecipesFiltered(userId, search, maxTime, servings, pageable)
+                .map(recipeMapper::toResponse);
+    }
 }
+

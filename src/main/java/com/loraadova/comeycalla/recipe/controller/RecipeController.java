@@ -10,6 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+import org.springframework.data.domain.*;
+import org.springframework.web.bind.annotation.*;
+
+
 import java.util.List;
 
 @RestController
@@ -33,16 +38,30 @@ public class RecipeController {
         return ResponseEntity.ok(updatedRecipe);
     }
 
-    // // GET /api/recipes?page=&size=&search=
-    // ResponseEntity<Page<RecipeResponse>> findAll(
-    //         @RequestParam int page,
-    //         @RequestParam int size,
-    //         @RequestParam(required = false) String search
-    // ) {
-    // }
-//
-    // ;
+    @GetMapping
+    public ResponseEntity<Page<RecipeResponse>> findAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer maxTime,
+            @RequestParam(required = false) Integer servings,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
 
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by("createdAt").descending()
+        );
+
+        Page<RecipeResponse> recipes = recipeService.findAll(
+                search,
+                maxTime,
+                servings,
+                pageable
+        );
+
+        return ResponseEntity.ok(recipes);
+    }
     @GetMapping("/{id}")
     public ResponseEntity<RecipeResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(this.recipeService.findById(id));
