@@ -19,10 +19,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-import java.util.Optional;
-
-
 @Service
 public class RecipeService {
     @Autowired
@@ -69,32 +65,14 @@ public class RecipeService {
 
     @Transactional
     public RecipeResponse update(Long id, RecipeRequest request) {
-        Recipe recipe = this.recipeRepository
-                .findRecipeByIdAndUser_Id(id, this.getCurrentUser().getId())
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+        Recipe recipe = findCurrentUserRecipe(id);
 
-        recipe.setTitle(request.getTitle());
-        recipe.setDescription(request.getDescription());
-        recipe.setImg(request.getImg());
-        recipe.setCookingTime(request.getCookingTime());
-        recipe.setServings(request.getServings());
-        recipe.setDifficulty(request.getDifficulty());
-        recipe.setCategory(request.getCategory());
+        updateBasicFields(recipe, request);
+        replaceRecipeChildren(recipe, request);
 
-        recipe.getIngredients().clear();
-        recipe.getSteps().clear();
-        recipe.getTags().clear();
+        Recipe savedRecipe = recipeRepository.save(recipe);
 
-        this.recipeIngredientRepository.deleteByRecipeId(recipe.getId());
-        this.recipeStepRepository.deleteByRecipeId(recipe.getId());
-        this.entityManager.flush();
-
-        setIngredients(request, recipe);
-        setSteps(request, recipe);
-        setTags(request, recipe);
-
-        Recipe savedRecipe = this.recipeRepository.save(recipe);
-        return this.recipeMapper.toResponse(savedRecipe);
+        return recipeMapper.toResponse(savedRecipe);
     }
 
     private void setTags(RecipeRequest request, Recipe recipe) {
@@ -131,6 +109,41 @@ public class RecipeService {
 
     private User getCurrentUser() {
         return this.currenUserService.getCurrentUser();
+    }
+
+    private Recipe findCurrentUserRecipe(Long id) {
+        return recipeRepository
+                .findRecipeByIdAndUser_Id(id, getCurrentUser().getId())
+                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+    }
+
+    private void updateBasicFields(Recipe recipe, RecipeRequest request) {
+        recipe.setTitle(request.getTitle());
+        recipe.setDescription(request.getDescription());
+        recipe.setImg(request.getImg());
+        recipe.setCookingTime(request.getCookingTime());
+        recipe.setServings(request.getServings());
+        recipe.setDifficulty(request.getDifficulty());
+        recipe.setCategory(request.getCategory());
+    }
+
+    private void replaceRecipeChildren(Recipe recipe, RecipeRequest request) {
+        clearRecipeChildren(recipe);
+
+        setIngredients(request, recipe);
+        setSteps(request, recipe);
+        setTags(request, recipe);
+    }
+
+    private void clearRecipeChildren(Recipe recipe) {
+        recipe.getIngredients().clear();
+        recipe.getSteps().clear();
+        recipe.getTags().clear();
+
+        recipeIngredientRepository.deleteByRecipeId(recipe.getId());
+        recipeStepRepository.deleteByRecipeId(recipe.getId());
+
+        entityManager.flush();
     }
 
 // // Obtener listado paginado (opcional filtro por texto)
