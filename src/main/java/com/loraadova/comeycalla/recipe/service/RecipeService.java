@@ -175,15 +175,25 @@ public class RecipeService {
 
     public Page<RecipeResponse> findAll(
             String search,
+            String category,
             Integer maxTime,
-            Integer servings,
             Pageable pageable
     ) {
         Long userId = this.getCurrentUser().getId();
 
         return recipeRepository
-                .findRecipesFiltered(userId, search, maxTime, servings, pageable)
+                .findRecipesFiltered(userId, search, category, maxTime, pageable)
                 .map(recipeMapper::toResponse);
     }
+
+    public List<String> findCategories() {
+        Long userId = this.getCurrentUser().getId();
+        List<Recipe> recipeList = this.recipeRepository.findByUserId(userId);
+        return recipeList.stream()
+                .map(Recipe::getCategory)
+                .distinct()
+                .toList();
+    }
+
 }
 

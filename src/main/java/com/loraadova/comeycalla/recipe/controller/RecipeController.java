@@ -41,27 +41,18 @@ public class RecipeController {
     @GetMapping
     public ResponseEntity<Page<RecipeResponse>> findAll(
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer maxTime,
-            @RequestParam(required = false) Integer servings,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "12") int size
     ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by("createdAt").descending()
+        return ResponseEntity.ok(
+                recipeService.findAll(search, category, maxTime, pageable)
         );
-
-        Page<RecipeResponse> recipes = recipeService.findAll(
-                search,
-                maxTime,
-                servings,
-                pageable
-        );
-
-        return ResponseEntity.ok(recipes);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<RecipeResponse> findById(@PathVariable Long id) {
         return ResponseEntity.ok(this.recipeService.findById(id));
@@ -82,6 +73,11 @@ public class RecipeController {
     @GetMapping("/random-recipe")
     ResponseEntity<RecipeResponse> randomRecipe() {
         return ResponseEntity.ok(this.recipeService.getRandomRecipe());
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<List<String>> findCategories() {
+        return ResponseEntity.ok(recipeService.findCategories());
     }
 
 }

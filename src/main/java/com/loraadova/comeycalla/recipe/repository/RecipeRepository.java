@@ -28,17 +28,17 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     WHERE r.user.id = :userId
     AND (:search IS NULL OR :search = ''
         OR LOWER(r.title) LIKE LOWER(CONCAT('%', :search, '%'))
-        OR LOWER(r.category) LIKE LOWER(CONCAT('%', :search, '%'))
         OR LOWER(i.name) LIKE LOWER(CONCAT('%', :search, '%'))
     )
+    AND (:category IS NULL OR :category = '' OR LOWER(r.category) = LOWER(:category))
     AND (:maxTime IS NULL OR r.cookingTime <= :maxTime)
-    AND (:servings IS NULL OR r.servings = :servings)
 """)
     Page<Recipe> findRecipesFiltered(
             @Param("userId") Long userId,
             @Param("search") String search,
+            @Param("category") String category,
             @Param("maxTime") Integer maxTime,
-            @Param("servings") Integer servings,
             Pageable pageable
     );
+
 }
