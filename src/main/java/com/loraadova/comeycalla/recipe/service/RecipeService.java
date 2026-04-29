@@ -56,9 +56,7 @@ public class RecipeService {
     }
 
     public RecipeResponse findById(Long id) {
-        Recipe recipe = recipeRepository
-                .findRecipeByIdAndUser_Id(id, this.getCurrentUser().getId())
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+        Recipe recipe = recipeRepository.findRecipeByIdAndUser_Id(id, this.getCurrentUser().getId()).orElseThrow(() -> new RuntimeException("Receta no encontrada"));
 
         return this.recipeMapper.toResponse(recipe);
     }
@@ -77,12 +75,11 @@ public class RecipeService {
 
     private void setTags(RecipeRequest request, Recipe recipe) {
         for (String tagName : request.getTags()) {
-            Tag tag = tagRepository.findByNameIgnoreCase(tagName)
-                    .orElseGet(() -> {
-                        Tag newTag = new Tag();
-                        newTag.setName(tagName);
-                        return tagRepository.save(newTag);
-                    });
+            Tag tag = tagRepository.findByNameIgnoreCase(tagName).orElseGet(() -> {
+                Tag newTag = new Tag();
+                newTag.setName(tagName);
+                return tagRepository.save(newTag);
+            });
 
             recipe.getTags().add(tag);
         }
@@ -112,9 +109,7 @@ public class RecipeService {
     }
 
     private Recipe findCurrentUserRecipe(Long id) {
-        return recipeRepository
-                .findRecipeByIdAndUser_Id(id, getCurrentUser().getId())
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+        return recipeRepository.findRecipeByIdAndUser_Id(id, getCurrentUser().getId()).orElseThrow(() -> new RuntimeException("Receta no encontrada"));
     }
 
     private void updateBasicFields(Recipe recipe, RecipeRequest request) {
@@ -146,12 +141,16 @@ public class RecipeService {
         entityManager.flush();
     }
 
+
+    @Transactional
+    public void delete(Long id) {
+        this.recipeRepository.deleteRecipeByIdAndUser_Id(id, this.getCurrentUser().getId());
+    }
+
+
 // // Obtener listado paginado (opcional filtro por texto)
 // Page<RecipeResponse> findAll(Pageable pageable, String search){};
 
-
-// // Eliminar receta
-// void delete(Long id, Long userId){};
 
 //// (Opcional) Obtener recetas del usuario
 // Page<RecipeResponse> findByUser(Long userId, Pageable pageable){};

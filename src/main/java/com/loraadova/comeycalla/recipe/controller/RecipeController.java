@@ -46,13 +46,14 @@ public class RecipeController {
         return ResponseEntity.ok(this.recipeService.findById(id));
     }
 
-//
-    // // DELETE /api/recipes/{id}
-    // ResponseEntity<Void> delete(@PathVariable Long id) {
-    // }
-//
-    // ;
-//
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> delete(@PathVariable Long id) {
+        this.recipeService.delete(id);
+        return ResponseEntity.ok().build();
+    }
+
+
     // // (Opcional) GET /api/recipes/me
     // ResponseEntity<Page<RecipeResponse>> findMyRecipes(
     //         @RequestParam int page,
