@@ -1,0 +1,17 @@
+services:
+  db:
+    image: mariadb:11
+    container_name: comeycalla-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: comeycalla
+      MARIADB_USER: comeycalla_user
+      MARIADB_PASSWORD: comeycalla_pass
+      MARIADB_ROOT_PASSWORD: root_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - comeycalla_data:/var/lib/mysql
+
+volumes:
+  comeycalla_data:
