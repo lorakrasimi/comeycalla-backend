@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Recipe {
+public class RecipeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +46,7 @@ public class Recipe {
     private String category;
 
     @OneToMany(
-            mappedBy = "recipe",
+            mappedBy = "recipeEntity",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
@@ -55,7 +55,7 @@ public class Recipe {
     private List<RecipeIngredient> ingredients = new ArrayList<>();
 
     @OneToMany(
-            mappedBy = "recipe",
+            mappedBy = "recipeEntity",
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )

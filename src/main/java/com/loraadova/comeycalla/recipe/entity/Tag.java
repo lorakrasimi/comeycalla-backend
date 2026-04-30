@@ -23,5 +23,5 @@ public class Tag {
     private String name;
 
     @ManyToMany(mappedBy = "tags")
-    private List<Recipe> recipes = new ArrayList<>();
+    private List<RecipeEntity> recipeEntities = new ArrayList<>();
 }

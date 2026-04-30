@@ -7,13 +7,12 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 import org.springframework.data.domain.*;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,18 +22,22 @@ public class RecipeController {
     @Autowired
     private RecipeService recipeService;
 
-    @PostMapping("/new")
-    ResponseEntity<RecipeResponse> create(@Valid @RequestBody RecipeRequest request) {
-        RecipeResponse savedRecipe = this.recipeService.create(request);
+    @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<RecipeResponse> create(
+            @RequestPart RecipeRequest recipe,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        RecipeResponse savedRecipe = this.recipeService.createRecipe(recipe, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRecipe);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<RecipeResponse> update(
             @PathVariable Long id,
-            @Valid @RequestBody RecipeRequest request
+            @Valid @RequestPart RecipeRequest recipe,
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        RecipeResponse updatedRecipe = this.recipeService.update(id, request);
+        RecipeResponse updatedRecipe = this.recipeService.updateRecipe(id, recipe, image);
         return ResponseEntity.ok(updatedRecipe);
     }
 
@@ -49,19 +52,19 @@ public class RecipeController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         return ResponseEntity.ok(
-                recipeService.findAll(search, category, maxTime, pageable)
+                recipeService.getAllRecipes(search, category, maxTime, pageable)
         );
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<RecipeResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(this.recipeService.findById(id));
+        return ResponseEntity.ok(this.recipeService.findRecipeById(id));
     }
 
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.recipeService.delete(id);
+        this.recipeService.deleteRecipe(id);
         return ResponseEntity.ok().build();
     }
 

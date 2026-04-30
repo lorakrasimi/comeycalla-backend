@@ -1,6 +1,6 @@
 package com.loraadova.comeycalla.recipe.repository;
 
-import com.loraadova.comeycalla.recipe.entity.Recipe;
+import com.loraadova.comeycalla.recipe.entity.RecipeEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,19 +11,19 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface RecipeRepository extends JpaRepository<Recipe, Long> {
+public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
 
-    Optional<Recipe> findRecipeByIdAndUser_Id(Long id, Long user_id);
+    Optional<RecipeEntity> findRecipeByIdAndUser_Id(Long id, Long user_id);
 
     void deleteRecipeByIdAndUser_Id(Long id, Long user_id);
 
-    List<Recipe> findTop10ByUserId(Long userId);
+    List<RecipeEntity> findTop10ByUserId(Long userId);
 
-    List<Recipe> findByUserId(Long userId);
+    List<RecipeEntity> findByUserId(Long userId);
 
     @Query("""
     SELECT DISTINCT r
-    FROM Recipe r
+    FROM RecipeEntity r
     LEFT JOIN r.ingredients i
     WHERE r.user.id = :userId
     AND (:search IS NULL OR :search = ''
@@ -33,7 +33,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     AND (:category IS NULL OR :category = '' OR LOWER(r.category) = LOWER(:category))
     AND (:maxTime IS NULL OR r.cookingTime <= :maxTime)
 """)
-    Page<Recipe> findRecipesFiltered(
+    Page<RecipeEntity> findRecipesFiltered(
             @Param("userId") Long userId,
             @Param("search") String search,
             @Param("category") String category,

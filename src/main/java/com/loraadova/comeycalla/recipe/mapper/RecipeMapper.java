@@ -17,14 +17,12 @@ public interface RecipeMapper {
     @Mapping(target = "ingredients", ignore = true)
     @Mapping(target = "steps", ignore = true)
     @Mapping(target = "tags", ignore = true)
-    Recipe toEntity(RecipeRequest request);
+    RecipeEntity toEntity(RecipeRequest request);
 
-    @Mapping(target = "tags", expression = "java(mapTags(recipe.getTags()))")
+    @Mapping(target = "tags", expression = "java(mapTags(recipeEntity.getTags()))")
     @Mapping(target = "ingredients", source = "ingredients")
     @Mapping(target = "steps", source = "steps")
-    RecipeResponse toResponse(Recipe recipe);
-
-    List<RecipeResponse> toResponseList(List<Recipe> recipes);
+    RecipeResponse toResponse(RecipeEntity recipeEntity);
 
     RecipeIngredient toEntity(RecipeIngredientRequest request);
 
