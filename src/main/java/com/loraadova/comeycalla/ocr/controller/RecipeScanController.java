@@ -22,7 +22,7 @@ public class RecipeScanController {
     @PostMapping("/scan")
     public ResponseEntity<RecipeScanResponseDto> scanRecipeImages(
             @RequestParam("images") List<MultipartFile> images,
-            @RequestParam("sections") List<String> sections
+            @RequestParam(value = "sections", required = false) List<String> sections
     ) {
         if (images == null || images.isEmpty()) {
             return ResponseEntity.badRequest().build();
