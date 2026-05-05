@@ -15,17 +15,19 @@ import java.util.List;
 public class RecipeScanController {
 
     @Autowired
-    RecipeScanService recipeScanService;
+    private RecipeScanService recipeScanService;
 
-    public RecipeScanController(RecipeScanService recipeScanService) {
-        this.recipeScanService = recipeScanService;
-    }
-
-    @PostMapping("/scan-text")
+    @PostMapping("/scan")
     public ResponseEntity<RecipeScanResponseDto> scanRecipeImages(
-            @RequestParam("images") List<MultipartFile> images
+            @RequestParam("images") List<MultipartFile> images,
+            @RequestParam(value = "sections", required = false) List<String> sections
     ) {
-        RecipeScanResponseDto result = this.recipeScanService.scanImages(images);
+        if (images.size() > 1 && (sections == null || sections.size() != images.size())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        RecipeScanResponseDto result = recipeScanService.scanImages(images, sections);
+
         return ResponseEntity.ok(result);
     }
 }
