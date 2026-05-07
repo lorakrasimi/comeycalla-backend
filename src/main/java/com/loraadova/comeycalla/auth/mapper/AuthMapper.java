@@ -15,7 +15,8 @@ public interface AuthMapper {
                 token,
                 user.getId(),
                 user.getUsername(),
-                user.getEmail()
+                user.getEmail(),
+                user.getAvatar()
         );
     }
 }

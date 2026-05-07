@@ -7,11 +7,13 @@ import com.loraadova.comeycalla.auth.mapper.AuthMapper;
 import com.loraadova.comeycalla.auth.security.JwtService;
 import com.loraadova.comeycalla.user.entity.UserEntity;
 import com.loraadova.comeycalla.user.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -59,6 +61,7 @@ public class AuthService {
         }
 
         String token = jwtService.generateToken(user.getEmail());
+
 
         return authMapper.toAuthResponse(user, token);
     }
