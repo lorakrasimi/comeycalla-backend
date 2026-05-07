@@ -170,8 +170,13 @@ public class MealPlanService {
 
         slot.setRecipe(newRecipe);
 
-        mealPlanRepository.save(mealPlan);
+        this.mealPlanRepository.save(mealPlan);
 
-        return mealPlanRecipeMapper.toResponse(newRecipe, mealType);
+        return this.mealPlanRecipeMapper.toResponse(newRecipe, mealType);
+    }
+
+
+    public MealPlanEntity getMealPlan(Long mealPlanId){
+        return this.mealPlanRepository.findById(mealPlanId) .orElseThrow(() -> new RuntimeException("No se encontró menú plan con ese id"));
     }
 }
