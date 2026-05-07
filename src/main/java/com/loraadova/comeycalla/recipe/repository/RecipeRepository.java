@@ -21,6 +21,8 @@ public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
 
     List<RecipeEntity> findByUserId(Long userId);
 
+    int countByUserId(Long userId);
+
     @Query("""
     SELECT DISTINCT r
     FROM RecipeEntity r

@@ -5,7 +5,7 @@ import com.loraadova.comeycalla.auth.dto.LoginRequest;
 import com.loraadova.comeycalla.auth.dto.RegisterRequest;
 import com.loraadova.comeycalla.auth.mapper.AuthMapper;
 import com.loraadova.comeycalla.auth.security.JwtService;
-import com.loraadova.comeycalla.user.entity.User;
+import com.loraadova.comeycalla.user.entity.UserEntity;
 import com.loraadova.comeycalla.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,17 +36,17 @@ public class AuthService {
             throw new IllegalArgumentException("El nombre de usuario ya existe");
         }
 
-        User user = authMapper.toEntity(request);
+        UserEntity user = authMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        User savedUser = userRepository.save(user);
+        UserEntity savedUser = userRepository.save(user);
         String token = jwtService.generateToken(savedUser.getEmail());
 
         return authMapper.toAuthResponse(savedUser, token);
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadCredentialsException("Credenciales incorrectas"));
 
         boolean passwordMatches = passwordEncoder.matches(

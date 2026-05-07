@@ -1,6 +1,6 @@
 package com.loraadova.comeycalla.recipe.entity;
 
-import com.loraadova.comeycalla.user.entity.User;
+import com.loraadova.comeycalla.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +23,7 @@ public class RecipeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserEntity user;
 
     @Column(nullable = false, length = 200)
     private String title;

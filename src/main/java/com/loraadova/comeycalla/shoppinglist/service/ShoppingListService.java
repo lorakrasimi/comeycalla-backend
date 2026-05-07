@@ -19,7 +19,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ShoppingListService {
     @Autowired
-    private OpenFoodFactsClassifierService classifierService;
+    private IngredientClassifierService classifierService;
 
     @Autowired
     private MealPlanService mealPlanService;

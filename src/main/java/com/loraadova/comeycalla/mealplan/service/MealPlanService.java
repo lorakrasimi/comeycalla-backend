@@ -81,6 +81,7 @@ public class MealPlanService {
         }
 
         mealPlan.setDays(days);
+        mealPlan.setUser(this.currenUserService.getCurrentUser());
 
         MealPlanEntity savedMealPlan = this.mealPlanRepository.save(mealPlan);
 
@@ -178,5 +179,9 @@ public class MealPlanService {
 
     public MealPlanEntity getMealPlan(Long mealPlanId){
         return this.mealPlanRepository.findById(mealPlanId) .orElseThrow(() -> new RuntimeException("No se encontró menú plan con ese id"));
+    }
+
+    public int getRecipesCountByUser(Long userId){
+        return this.mealPlanRepository.countByUserId(userId);
     }
 }

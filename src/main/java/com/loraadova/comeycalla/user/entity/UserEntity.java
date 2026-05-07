@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,4 +24,7 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(length = 500)
+    private String avatar;
 }

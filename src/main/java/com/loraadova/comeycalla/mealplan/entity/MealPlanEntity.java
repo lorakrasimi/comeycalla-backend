@@ -1,6 +1,6 @@
 package com.loraadova.comeycalla.mealplan.entity;
 
-import com.loraadova.comeycalla.user.entity.User;
+import com.loraadova.comeycalla.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +23,7 @@ public class MealPlanEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_meal_plans_user"))
-    private User user;
+    private UserEntity user;
 
     @Column(name = "days_count", nullable = false)
     private Integer daysCount;

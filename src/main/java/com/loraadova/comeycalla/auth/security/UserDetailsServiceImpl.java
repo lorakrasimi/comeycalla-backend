@@ -1,6 +1,6 @@
 package com.loraadova.comeycalla.auth.security;
 
-import com.loraadova.comeycalla.user.entity.User;
+import com.loraadova.comeycalla.user.entity.UserEntity;
 import com.loraadova.comeycalla.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +18,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
         return new org.springframework.security.core.userdetails.User(

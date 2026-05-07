@@ -13,7 +13,7 @@ import com.loraadova.comeycalla.recipe.repository.RecipeIngredientRepository;
 import com.loraadova.comeycalla.recipe.repository.RecipeRepository;
 import com.loraadova.comeycalla.recipe.repository.RecipeStepRepository;
 import com.loraadova.comeycalla.recipe.repository.TagRepository;
-import com.loraadova.comeycalla.user.entity.User;
+import com.loraadova.comeycalla.user.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -129,7 +129,7 @@ public class RecipeService {
         }
     }
 
-    private User getCurrentUser() {
+    private UserEntity getCurrentUser() {
         return this.currenUserService.getCurrentUser();
     }
 
@@ -211,6 +211,10 @@ public class RecipeService {
                 .map(RecipeEntity::getCategory)
                 .distinct()
                 .toList();
+    }
+
+    public int getRecipesCountByUser(Long userId){
+        return this.recipeRepository.countByUserId(userId);
     }
 
 }
