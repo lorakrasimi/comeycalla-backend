@@ -44,7 +44,7 @@ public class AuthService {
         UserEntity savedUser = userRepository.save(user);
         String token = jwtService.generateToken(savedUser.getEmail());
 
-        return authMapper.toAuthResponse(savedUser, token);
+        return this.authMapper.toAuthResponse(savedUser, token);
     }
 
     public AuthResponse login(LoginRequest request) {
