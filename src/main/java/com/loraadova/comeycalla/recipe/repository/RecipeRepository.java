@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-
 public interface RecipeRepository extends JpaRepository<RecipeEntity, Long> {
 
     Optional<RecipeEntity> findRecipeByIdAndUser_Id(Long id, Long user_id);
