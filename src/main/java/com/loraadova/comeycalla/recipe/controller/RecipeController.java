@@ -80,7 +80,7 @@ public class RecipeController {
 
     @GetMapping("/categories")
     public ResponseEntity<List<String>> findCategories() {
-        return ResponseEntity.ok(recipeService.findCategories());
+        return ResponseEntity.ok(this.recipeService.findCategories());
     }
 
 }

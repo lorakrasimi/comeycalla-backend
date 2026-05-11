@@ -1,7 +1,7 @@
-package com.loraadova.comeycalla.ocr;
+package com.loraadova.comeycalla.imports.ocr.service.service;
 
 import com.loraadova.comeycalla.config.GoogleVisionService;
-import com.loraadova.comeycalla.ocr.dto.RecipeScanResponseDto;
+import com.loraadova.comeycalla.imports.dto.RecipeScanResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

@@ -23,9 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class RecipeService {
@@ -179,7 +177,7 @@ public class RecipeService {
     }
 
     public RecipeResponse getRandomRecipe() {
-        List<RecipeEntity> result = recipeRepository.findByUserId(this.getCurrentUser().getId());
+        List<RecipeEntity> result = this.recipeRepository.findByUserId(this.getCurrentUser().getId());
 
         if (result.isEmpty()) {
             return new RecipeResponse();
@@ -207,8 +205,10 @@ public class RecipeService {
     public List<String> findCategories() {
         Long userId = this.getCurrentUser().getId();
         List<RecipeEntity> recipeEntityList = this.recipeRepository.findByUserId(userId);
+
         return recipeEntityList.stream()
                 .map(RecipeEntity::getCategory)
+                .filter(category -> category != null && !category.isBlank())
                 .distinct()
                 .toList();
     }

@@ -1,7 +1,10 @@
-package com.loraadova.comeycalla.ocr.controller;
+package com.loraadova.comeycalla.imports.controller;
 
-import com.loraadova.comeycalla.ocr.RecipeScanService;
-import com.loraadova.comeycalla.ocr.dto.RecipeScanResponseDto;
+import com.loraadova.comeycalla.imports.dto.RecipeImportRequest;
+import com.loraadova.comeycalla.imports.ocr.service.service.RecipeScanService;
+import com.loraadova.comeycalla.imports.dto.RecipeScanResponseDto;
+import com.loraadova.comeycalla.imports.url.service.RecipeImportService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,11 +16,11 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class RecipeScanController {
 
-    private final RecipeScanService recipeScanService;
+    @Autowired
+    private  RecipeScanService recipeScanService;
 
-    public RecipeScanController(RecipeScanService recipeScanService) {
-        this.recipeScanService = recipeScanService;
-    }
+    @Autowired
+    private RecipeImportService recipeImportService;
 
     @PostMapping("/scan")
     public ResponseEntity<RecipeScanResponseDto> scanRecipeImages(
@@ -31,5 +34,11 @@ public class RecipeScanController {
         RecipeScanResponseDto result = recipeScanService.scanImages(images, sections);
 
         return ResponseEntity.ok(result);
+    }
+
+
+    @PostMapping("/import-url")
+    public RecipeScanResponseDto importFromUrl(@RequestBody RecipeImportRequest request) {
+        return this.recipeImportService.importFromUrl(request.url());
     }
 }

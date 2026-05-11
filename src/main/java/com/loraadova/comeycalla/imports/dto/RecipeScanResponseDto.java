@@ -1,4 +1,4 @@
-package com.loraadova.comeycalla.ocr.dto;
+package com.loraadova.comeycalla.imports.dto;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
