@@ -1,9 +1,10 @@
 package com.loraadova.comeycalla.recipe.service;
 
 import com.loraadova.comeycalla.auth.security.CurrenUserService;
+import com.loraadova.comeycalla.common.service.CloudinaryService;
 import com.loraadova.comeycalla.recipe.dto.RecipeRequest;
 import com.loraadova.comeycalla.recipe.dto.RecipeResponse;
-import com.loraadova.comeycalla.recipe.entity.Recipe;
+import com.loraadova.comeycalla.recipe.entity.RecipeEntity;
 import com.loraadova.comeycalla.recipe.entity.RecipeIngredient;
 import com.loraadova.comeycalla.recipe.entity.RecipeStep;
 import com.loraadova.comeycalla.recipe.entity.Tag;
@@ -12,16 +13,17 @@ import com.loraadova.comeycalla.recipe.repository.RecipeIngredientRepository;
 import com.loraadova.comeycalla.recipe.repository.RecipeRepository;
 import com.loraadova.comeycalla.recipe.repository.RecipeStepRepository;
 import com.loraadova.comeycalla.recipe.repository.TagRepository;
-import com.loraadova.comeycalla.user.entity.User;
+import com.loraadova.comeycalla.user.entity.UserEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Objects;
-import java.util.Optional;
-
+import java.util.*;
 
 @Service
 public class RecipeService {
@@ -43,103 +45,177 @@ public class RecipeService {
     @Autowired
     private RecipeStepRepository recipeStepRepository;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
 
-    public RecipeResponse create(RecipeRequest request) {
-        Recipe newRecipe = this.recipeMapper.toEntity(request);
-        newRecipe.setUser(this.getCurrentUser());
+    public RecipeResponse createRecipe(RecipeRequest request, MultipartFile image) {
+        RecipeEntity newRecipeEntity = this.recipeMapper.toEntity(request);
+        newRecipeEntity.setUser(this.getCurrentUser());
+        String imageUrl = cloudinaryService.uploadImage(image);
+        if (imageUrl != null) newRecipeEntity.setImg(imageUrl);
 
-        if (request.getIngredients() != null) setIngredients(request, newRecipe);
-        if (request.getSteps() != null) setSteps(request, newRecipe);
-        if (request.getTags() != null) setTags(request, newRecipe);
 
-        Recipe saverdRecipe = this.recipeRepository.save(newRecipe);
-        return this.recipeMapper.toResponse(saverdRecipe);
+        if (request.getIngredients() != null) setIngredients(request, newRecipeEntity);
+        if (request.getSteps() != null) setSteps(request, newRecipeEntity);
+        if (request.getTags() != null) setTags(request, newRecipeEntity);
+
+        RecipeEntity saverdRecipeEntity = this.recipeRepository.save(newRecipeEntity);
+        return this.recipeMapper.toResponse(saverdRecipeEntity);
     }
 
-    public RecipeResponse findById(Long id) {
-        Recipe recipe = recipeRepository
-                .findRecipeByIdAndUser_Id(id, this.getCurrentUser().getId())
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+    public RecipeResponse findRecipeById(Long id) {
+        RecipeEntity recipeEntity = recipeRepository.findRecipeByIdAndUser_Id(id, this.getCurrentUser().getId()).orElseThrow(() -> new RuntimeException("Receta no encontrada"));
 
-        return this.recipeMapper.toResponse(recipe);
+        return this.recipeMapper.toResponse(recipeEntity);
     }
 
     @Transactional
-    public RecipeResponse update(Long id, RecipeRequest request) {
-        Recipe recipe = this.recipeRepository
-                .findRecipeByIdAndUser_Id(id, this.getCurrentUser().getId())
-                .orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+    public RecipeResponse updateRecipe(Long id, RecipeRequest request, MultipartFile image) {
+        RecipeEntity recipeEntity = findCurrentUserRecipe(id);
 
-        recipe.setTitle(request.getTitle());
-        recipe.setDescription(request.getDescription());
-        recipe.setImg(request.getImg());
-        recipe.setCookingTime(request.getCookingTime());
-        recipe.setServings(request.getServings());
-        recipe.setDifficulty(request.getDifficulty());
-        recipe.setCategory(request.getCategory());
+        updateBasicFields(recipeEntity, request);
+        replaceRecipeChildren(recipeEntity, request);
 
-        recipe.getIngredients().clear();
-        recipe.getSteps().clear();
-        recipe.getTags().clear();
+        // If image is null = no changes
+        if (image != null) {
+            if (image.isEmpty()) {
+                // Delete image
+                recipeEntity.setImg(null);
+            } else {
+                // New image
+                String imageUrl = cloudinaryService.uploadImage(image);
+                recipeEntity.setImg(imageUrl);
+            }
+        }
 
-        this.recipeIngredientRepository.deleteByRecipeId(recipe.getId());
-        this.recipeStepRepository.deleteByRecipeId(recipe.getId());
-        this.entityManager.flush();
 
-        setIngredients(request, recipe);
-        setSteps(request, recipe);
-        setTags(request, recipe);
-
-        Recipe savedRecipe = this.recipeRepository.save(recipe);
-        return this.recipeMapper.toResponse(savedRecipe);
+        return recipeMapper.toResponse(recipeRepository.save(recipeEntity));
     }
 
-    private void setTags(RecipeRequest request, Recipe recipe) {
+    private void setTags(RecipeRequest request, RecipeEntity recipeEntity) {
         for (String tagName : request.getTags()) {
-            Tag tag = tagRepository.findByNameIgnoreCase(tagName)
-                    .orElseGet(() -> {
-                        Tag newTag = new Tag();
-                        newTag.setName(tagName);
-                        return tagRepository.save(newTag);
-                    });
+            Tag tag = tagRepository.findByNameIgnoreCase(tagName).orElseGet(() -> {
+                Tag newTag = new Tag();
+                newTag.setName(tagName);
+                return tagRepository.save(newTag);
+            });
 
-            recipe.getTags().add(tag);
+            recipeEntity.getTags().add(tag);
         }
 
     }
 
-    private void setSteps(RecipeRequest request, Recipe recipe) {
+    private void setSteps(RecipeRequest request, RecipeEntity recipeEntity) {
         for (int i = 0; i < request.getSteps().size(); i++) {
             RecipeStep step = recipeMapper.toEntity(request.getSteps().get(i));
-            step.setRecipe(recipe);
+            step.setRecipeEntity(recipeEntity);
             step.setStepOrder(i + 1);
-            recipe.getSteps().add(step);
+            recipeEntity.getSteps().add(step);
         }
     }
 
-    private void setIngredients(RecipeRequest request, Recipe recipe) {
+    private void setIngredients(RecipeRequest request, RecipeEntity recipeEntity) {
         for (int i = 0; i < request.getIngredients().size(); i++) {
             RecipeIngredient ingredient = recipeMapper.toEntity(request.getIngredients().get(i));
-            ingredient.setRecipe(recipe);
+            ingredient.setRecipeEntity(recipeEntity);
             ingredient.setPosition(i + 1);
-            recipe.getIngredients().add(ingredient);
+            recipeEntity.getIngredients().add(ingredient);
         }
     }
 
-    private User getCurrentUser() {
+    private UserEntity getCurrentUser() {
         return this.currenUserService.getCurrentUser();
     }
 
-// // Obtener listado paginado (opcional filtro por texto)
-// Page<RecipeResponse> findAll(Pageable pageable, String search){};
+    private RecipeEntity findCurrentUserRecipe(Long id) {
+        return recipeRepository.findRecipeByIdAndUser_Id(id, getCurrentUser().getId()).orElseThrow(() -> new RuntimeException("Receta no encontrada"));
+    }
+
+    private void updateBasicFields(RecipeEntity recipeEntity, RecipeRequest request) {
+        recipeEntity.setTitle(request.getTitle());
+        recipeEntity.setDescription(request.getDescription());
+        recipeEntity.setCookingTime(request.getCookingTime());
+        recipeEntity.setServings(request.getServings());
+        recipeEntity.setDifficulty(request.getDifficulty());
+        recipeEntity.setCategory(request.getCategory());
+    }
+
+    private void replaceRecipeChildren(RecipeEntity recipeEntity, RecipeRequest request) {
+        clearRecipeChildren(recipeEntity);
+
+        setIngredients(request, recipeEntity);
+        setSteps(request, recipeEntity);
+        setTags(request, recipeEntity);
+    }
+
+    private void clearRecipeChildren(RecipeEntity recipeEntity) {
+        recipeEntity.getIngredients().clear();
+        recipeEntity.getSteps().clear();
+        recipeEntity.getTags().clear();
+
+        recipeIngredientRepository.deleteByRecipeEntityId(recipeEntity.getId());
+        recipeStepRepository.deleteByRecipeEntityId(recipeEntity.getId());
+
+        entityManager.flush();
+    }
 
 
-// // Eliminar receta
-// void delete(Long id, Long userId){};
+    @Transactional
+    public void deleteRecipe(Long id) {
+        this.recipeRepository.deleteRecipeByIdAndUser_Id(id, this.getCurrentUser().getId());
+    }
 
-//// (Opcional) Obtener recetas del usuario
-// Page<RecipeResponse> findByUser(Long userId, Pageable pageable){};
+    public List<RecipeResponse> getLastRecipes() {
+        List<RecipeEntity> recipeEntityList = this.recipeRepository.findTop10ByUserId(this.getCurrentUser().getId());
+        List<RecipeResponse> recipeResponseList = new ArrayList<>();
+        recipeEntityList.forEach(recipe -> recipeResponseList.add(this.recipeMapper.toResponse(recipe)));
+        return recipeResponseList;
+    }
+
+    public RecipeResponse getRandomRecipe() {
+        List<RecipeEntity> result = this.recipeRepository.findByUserId(this.getCurrentUser().getId());
+
+        if (result.isEmpty()) {
+            return new RecipeResponse();
+        }
+
+        int index = new Random().nextInt(result.size());
+        RecipeEntity randomRecipeEntity = result.get(index);
+
+        return this.recipeMapper.toResponse(randomRecipeEntity);
+    }
+
+    public Page<RecipeResponse> getAllRecipes(
+            String search,
+            String category,
+            Integer maxTime,
+            Pageable pageable
+    ) {
+        Long userId = this.getCurrentUser().getId();
+
+        return recipeRepository
+                .findRecipesFiltered(userId, search, category, maxTime, pageable)
+                .map(recipeMapper::toResponse);
+    }
+
+    public List<String> findCategories() {
+        Long userId = this.getCurrentUser().getId();
+        List<RecipeEntity> recipeEntityList = this.recipeRepository.findByUserId(userId);
+
+        return recipeEntityList.stream()
+                .map(RecipeEntity::getCategory)
+                .filter(category -> category != null && !category.isBlank())
+                .distinct()
+                .toList();
+    }
+
+    public int getRecipesCountByUser(Long userId){
+        return this.recipeRepository.countByUserId(userId);
+    }
+
 }
+

@@ -1,6 +1,6 @@
 package com.loraadova.comeycalla.auth.security;
 
-import com.loraadova.comeycalla.user.entity.User;
+import com.loraadova.comeycalla.user.entity.UserEntity;
 import com.loraadova.comeycalla.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,7 +12,7 @@ public class CurrenUserService {
     @Autowired
     UserRepository userRepository;
 
-    public User getCurrentUser() {
+    public UserEntity getCurrentUser() {
         String email = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
