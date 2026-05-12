@@ -55,9 +55,18 @@ public class RecipeService {
     public RecipeResponse createRecipe(RecipeRequest request, MultipartFile image) {
         RecipeEntity newRecipeEntity = this.recipeMapper.toEntity(request);
         newRecipeEntity.setUser(this.getCurrentUser());
-        String imageUrl = cloudinaryService.uploadImage(image);
-        if (imageUrl != null) newRecipeEntity.setImg(imageUrl);
 
+        String imageUrl = null;
+
+        if (image != null && !image.isEmpty()) {
+            imageUrl = this.cloudinaryService.uploadImage(image);
+        } else if (request.getImg() != null && !request.getImg().isBlank()) {
+            imageUrl = request.getImg();
+        }
+
+        if (imageUrl != null) {
+            newRecipeEntity.setImg(imageUrl);
+        }
 
         if (request.getIngredients() != null) setIngredients(request, newRecipeEntity);
         if (request.getSteps() != null) setSteps(request, newRecipeEntity);
@@ -147,9 +156,10 @@ public class RecipeService {
     private void replaceRecipeChildren(RecipeEntity recipeEntity, RecipeRequest request) {
         clearRecipeChildren(recipeEntity);
 
-        setIngredients(request, recipeEntity);
-        setSteps(request, recipeEntity);
-        setTags(request, recipeEntity);
+        if (request.getIngredients() != null) setIngredients(request, recipeEntity);
+        if (request.getSteps() != null) setSteps(request, recipeEntity);
+        if (request.getTags() != null) setTags(request, recipeEntity);
+
     }
 
     private void clearRecipeChildren(RecipeEntity recipeEntity) {
