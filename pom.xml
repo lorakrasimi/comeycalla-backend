@@ -98,16 +98,37 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Se detectó una vulnerabilidad transitiva asociada a una dependencia utilizada por Cloudinary.
+         Para corregirla se añadió explícitamente la versión segura de Apache Commons Lang,
+         evitando que Maven resolviera una versión vulnerable de forma transitiva. -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.18.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.cloudinary</groupId>
             <artifactId>cloudinary-http5</artifactId>
-            <version>2.0.0</version>
+            <version>2.1.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-vision</artifactId>
             <version>3.39.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>4.28.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-javalite</artifactId>
+            <version>4.28.2</version>
         </dependency>
 
         <dependency>
@@ -126,6 +147,8 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+
+
     </dependencies>
 
     <build>

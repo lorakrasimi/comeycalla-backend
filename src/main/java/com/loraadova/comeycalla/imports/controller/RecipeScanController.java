@@ -1,9 +1,9 @@
 package com.loraadova.comeycalla.imports.controller;
 
 import com.loraadova.comeycalla.imports.dto.RecipeImportRequest;
-import com.loraadova.comeycalla.imports.ocr.service.service.RecipeScanService;
+import com.loraadova.comeycalla.imports.ocr.service.service.RecipeImportImageService;
 import com.loraadova.comeycalla.imports.dto.RecipeScanResponseDto;
-import com.loraadova.comeycalla.imports.url.service.RecipeImportService;
+import com.loraadova.comeycalla.imports.url.service.RecipeImportUrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +17,10 @@ import java.util.List;
 public class RecipeScanController {
 
     @Autowired
-    private  RecipeScanService recipeScanService;
+    private RecipeImportImageService recipeScanService;
 
     @Autowired
-    private RecipeImportService recipeImportService;
+    private RecipeImportUrlService recipeImportService;
 
     @PostMapping("/scan")
     public ResponseEntity<RecipeScanResponseDto> scanRecipeImages(
@@ -35,7 +35,6 @@ public class RecipeScanController {
 
         return ResponseEntity.ok(result);
     }
-
 
     @PostMapping("/import-url")
     public RecipeScanResponseDto importFromUrl(@RequestBody RecipeImportRequest request) {

@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class RecipeImportService {
+public class RecipeImportUrlService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -76,13 +76,13 @@ public class RecipeImportService {
                     continue;
                 }
 
-                String title = getText(recipeNode, "name");
-                String description = getText(recipeNode, "description");
-                String image = extractImage(recipeNode.get("image"));
-                Integer time = extractTime(recipeNode);
+                String title = this.getText(recipeNode, "name");
+                String description = this.getText(recipeNode, "description");
+                String image = this.extractImage(recipeNode.get("image"));
+                Integer time = this.extractTime(recipeNode);
 
-                List<String> ingredients = extractStringList(recipeNode.get("recipeIngredient"));
-                List<String> instructions = extractInstructions(recipeNode.get("recipeInstructions"));
+                List<String> ingredients = this.extractStringList(recipeNode.get("recipeIngredient"));
+                List<String> instructions = this.extractInstructions(recipeNode.get("recipeInstructions"));
 
                 return new RecipeScanResponseDto(
                         title,
@@ -99,10 +99,8 @@ public class RecipeImportService {
                 );
 
             } catch (Exception ignored) {
-                // Some pages contain invalid or mixed JSON-LD. Ignore and continue.
             }
         }
-
         return null;
     }
 
@@ -111,13 +109,13 @@ public class RecipeImportService {
             return null;
         }
 
-        if (isRecipe(node)) {
+        if (this.isRecipe(node)) {
             return node;
         }
 
         if (node.has("@graph")) {
             for (JsonNode child : node.get("@graph")) {
-                if (isRecipe(child)) {
+                if (this.isRecipe(child)) {
                     return child;
                 }
             }
@@ -125,7 +123,7 @@ public class RecipeImportService {
 
         if (node.isArray()) {
             for (JsonNode child : node) {
-                JsonNode result = findRecipeNode(child);
+                JsonNode result = this.findRecipeNode(child);
                 if (result != null) {
                     return result;
                 }
@@ -153,7 +151,6 @@ public class RecipeImportService {
                 }
             }
         }
-
         return false;
     }
 
@@ -271,8 +268,6 @@ public class RecipeImportService {
                 contentOrTextFromFirst(recipeElement, "[itemprop=recipeYield]")
         );
 
-        String category = contentOrTextFromFirst(recipeElement, "[itemprop=recipeCategory]");
-
         List<String> ingredients = recipeElement
                 .select("[itemprop=recipeIngredient]")
                 .eachText()
@@ -300,7 +295,7 @@ public class RecipeImportService {
                 cookingTime,
                 servings,
                 "",
-                cleanParsedItem(category),
+                "",
                 ingredients,
                 steps,
                 new ArrayList<>(),
@@ -317,6 +312,7 @@ public class RecipeImportService {
 
         return element.text();
     }
+
     private String contentOrTextFromFirst(Element parent, String selector) {
         Element element = parent.selectFirst(selector);
 
@@ -438,5 +434,4 @@ public class RecipeImportService {
 
         return null;
     }
-
 }
