@@ -17,10 +17,10 @@ import java.util.*;
 public class MealPlanService {
 
     @Autowired
-    private  MealPlanRepository mealPlanRepository;
+    private MealPlanRepository mealPlanRepository;
 
     @Autowired
-    private  RecipeRepository recipeRepository;
+    private RecipeRepository recipeRepository;
 
     @Autowired
     private CurrenUserService currenUserService;
@@ -37,7 +37,9 @@ public class MealPlanService {
         int neededRecipes = request.getDays() * request.getMeals().size();
 
         if (request.getExcludeRepeatedRecipes() && recipes.size() < neededRecipes) {
-            throw new RuntimeException("No hay suficientes recetas para generar un menú sin repetir.");
+            throw new IllegalArgumentException(
+                    "No hay suficientes recetas para generar un menú sin repetir."
+            );
         }
 
         Collections.shuffle(recipes);
@@ -97,6 +99,7 @@ public class MealPlanService {
             throw new RuntimeException("Debes seleccionar al menos una comida.");
         }
     }
+
     private MealPlanResponse mapToResponse(MealPlanEntity mealPlan, List<MealType> mealsConfig) {
 
         List<MealPlanDayResponse> dayResponses = mealPlan.getDays()
@@ -177,11 +180,11 @@ public class MealPlanService {
     }
 
 
-    public MealPlanEntity getMealPlan(Long mealPlanId){
-        return this.mealPlanRepository.findById(mealPlanId) .orElseThrow(() -> new RuntimeException("No se encontró menú plan con ese id"));
+    public MealPlanEntity getMealPlan(Long mealPlanId) {
+        return this.mealPlanRepository.findById(mealPlanId).orElseThrow(() -> new RuntimeException("No se encontró menú plan con ese id"));
     }
 
-    public int getRecipesCountByUser(Long userId){
+    public int getRecipesCountByUser(Long userId) {
         return this.mealPlanRepository.countByUserId(userId);
     }
 }

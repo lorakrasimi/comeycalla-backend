@@ -230,25 +230,54 @@ public class RecipeImportUrlService {
     }
 
     private RecipeScanResponseDto extractFallback(Document document) {
-        String title = document.selectFirst("h1") != null
-                ? document.selectFirst("h1").text()
-                : document.title();
+        Element titleElement = document.selectFirst("h1, h2.wp-block-heading, h2");
+        String title = titleElement != null ? titleElement.text() : document.title();
 
-        String description = document.select("meta[name=description]").attr("content");
-        String image = document.select("meta[property=og:image]").attr("content");
+        String description = "";
+        Element firstParagraph = document.selectFirst("p");
+        if (firstParagraph != null) {
+            description = firstParagraph.text();
+        }
+
+        Integer servings = extractServingsFromText(document.text());
+
+        Integer cookingTime = null;
+        Matcher timeMatcher = Pattern
+                .compile("(\\d+)\\s*(min|minutos|hora|horas)", Pattern.CASE_INSENSITIVE)
+                .matcher(document.text());
+
+        if (timeMatcher.find()) {
+            cookingTime = extractMinutes(timeMatcher.group());
+        }
+
+        List<String> ingredients = document
+                .select("h3:containsOwn(Ingredientes) + ul li, ul.wp-block-list li")
+                .eachText()
+                .stream()
+                .map(this::cleanParsedItem)
+                .filter(item -> !item.isBlank())
+                .toList();
+
+        List<String> steps = document
+                .select("h3:containsOwn(Cómo hacer) + ol li, ol.wp-block-list li")
+                .eachText()
+                .stream()
+                .map(this::cleanParsedItem)
+                .filter(item -> !item.isBlank())
+                .toList();
 
         return new RecipeScanResponseDto(
-                title,
-                description,
-                image,
-                0,
-                0,
+                cleanParsedItem(title),
+                cleanParsedItem(description),
+                document.select("meta[property=og:image]").attr("content"),
+                cookingTime,
+                servings,
                 "",
                 "",
-                List.of(),
-                List.of(),
-                List.of(),
-                ""
+                ingredients,
+                steps,
+                new ArrayList<>(),
+                document.text()
         );
     }
 
@@ -430,6 +459,18 @@ public class RecipeImportUrlService {
 
         if (simpleNumberMatcher.find()) {
             return Integer.parseInt(simpleNumberMatcher.group(1));
+        }
+
+        return null;
+    }
+
+    private Integer extractServingsFromText(String text) {
+        Matcher matcher = Pattern
+                .compile("(\\d+)\\s*(comensales|personas|raciones|porciones)", Pattern.CASE_INSENSITIVE)
+                .matcher(text);
+
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
         }
 
         return null;
