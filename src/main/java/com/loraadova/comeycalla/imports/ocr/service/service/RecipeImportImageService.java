@@ -542,15 +542,15 @@ public class RecipeImportImageService {
 
     private String mapDifficulty(String lower) {
         if (lower.contains("facil") || lower.contains("easy") || lower.contains("baja")) {
-            return "easy";
+            return "facil";
         }
 
         if (lower.contains("dificil") || lower.contains("hard") || lower.contains("alta")) {
-            return "hard";
+            return "dificil";
         }
 
         if (lower.contains("media") || lower.contains("medio") || lower.contains("medium")) {
-            return "medium";
+            return "media";
         }
 
         return null;
