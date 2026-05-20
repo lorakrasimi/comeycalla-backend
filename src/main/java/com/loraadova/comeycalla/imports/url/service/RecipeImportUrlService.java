@@ -48,7 +48,7 @@ public class RecipeImportUrlService {
 
         } catch (Exception e) {
             throw new RuntimeException(
-                    "No se ha podido importar la receta desde esta URL."
+                    "No se ha podido importar la receta desde esta URL.", e
             );
         }
     }
