@@ -53,15 +53,13 @@ public class UserService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
 
-        if (avatar != null) {
-            if (avatar.isEmpty()) {
-                // Delete image
-                user.setAvatar(null);
-            } else {
-                // New image
-                String imageUrl = this.cloudinaryService.uploadImage(avatar);
-                user.setAvatar(imageUrl);
-            }
+        if (avatar == null) {
+            // Borra imagen
+            user.setAvatar(null);
+        } else {
+            // Nueva imagen
+            String imageUrl = this.cloudinaryService.uploadImage(avatar);
+            user.setAvatar(imageUrl);
         }
 
 
