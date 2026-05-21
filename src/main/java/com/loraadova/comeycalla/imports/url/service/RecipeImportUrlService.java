@@ -3,6 +3,7 @@ package com.loraadova.comeycalla.imports.url.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loraadova.comeycalla.imports.dto.RecipeScanResponseDto;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,18 +28,24 @@ public class RecipeImportUrlService {
                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36")
                     .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                     .header("Accept-Language", "es-ES,es;q=0.9,en;q=0.8")
+                    .header("Cache-Control", "no-cache")
+                    .header("Pragma", "no-cache")
+                    .header("Upgrade-Insecure-Requests", "1")
                     .referrer("https://www.google.com/")
                     .followRedirects(true)
+                    .ignoreHttpErrors(true)
                     .timeout(15000)
                     .get();
 
-            RecipeScanResponseDto recipeFromJsonLd = extractFromJsonLd(document);
+            RecipeScanResponseDto recipeFromJsonLd =
+                    extractFromJsonLd(document);
 
             if (recipeFromJsonLd != null) {
                 return recipeFromJsonLd;
             }
 
-            RecipeScanResponseDto recipeFromMicrodata = extractFromMicrodata(document);
+            RecipeScanResponseDto recipeFromMicrodata =
+                    extractFromMicrodata(document);
 
             if (recipeFromMicrodata != null) {
                 return recipeFromMicrodata;
@@ -46,9 +53,23 @@ public class RecipeImportUrlService {
 
             return extractFallback(document);
 
-        } catch (Exception e) {
+        } catch (HttpStatusException e) {
+
+            if (e.getStatusCode() == 403) {
+                throw new RuntimeException(
+                        "Esta web no permite importar recetas automáticamente."
+                );
+            }
+
             throw new RuntimeException(
-                    "No se ha podido importar la receta desde esta URL.", e
+                    "Error al acceder a la URL. Código HTTP: "
+                            + e.getStatusCode()
+            );
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                    "No se ha podido importar la receta desde esta URL."
             );
         }
     }
