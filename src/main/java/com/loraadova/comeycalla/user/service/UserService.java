@@ -1,6 +1,6 @@
 package com.loraadova.comeycalla.user.service;
 
-import com.loraadova.comeycalla.auth.security.CurrenUserService;
+import com.loraadova.comeycalla.auth.security.CurrentUserService;
 import com.loraadova.comeycalla.common.CloudinaryService;
 import com.loraadova.comeycalla.mealplan.service.MealPlanService;
 import com.loraadova.comeycalla.recipe.service.RecipeService;
@@ -10,6 +10,7 @@ import com.loraadova.comeycalla.user.dto.UserStatsDto;
 import com.loraadova.comeycalla.user.entity.UserEntity;
 import com.loraadova.comeycalla.user.mapper.UserMapper;
 import com.loraadova.comeycalla.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,28 +31,30 @@ public class UserService {
     private MealPlanService mealPlanService;
 
     @Autowired
-    private CurrenUserService currenUserService;
+    private CurrentUserService currentUserService;
 
     @Autowired
     private CloudinaryService cloudinaryService;
 
     public UserProfileResponseDto getProfile() {
-        UserEntity user = userRepository.findById(this.currenUserService.getCurrentUserId())
+        UserEntity user = userRepository.findById(this.currentUserService.getCurrentUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         UserProfileResponseDto dto = userMapper.toDto(user);
-
         dto.setStats(mockStats(user.getId()));
-
         return dto;
     }
 
     public UserProfileResponseDto updateProfile(UpdateUserProfileRequestDto request, MultipartFile avatar) {
-        UserEntity user = userRepository.findById(this.currenUserService.getCurrentUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        UserEntity user = userRepository.findById(this.currentUserService.getCurrentUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
+        if (userRepository.existsByUsernameAndIdNot(request.getUsername(), user.getId())) {
+            throw new IllegalArgumentException("El nombre de usuario ya existe");
+        } else user.setUsername(request.getUsername());
+
+        if (userRepository.existsByEmailAndIdNot(request.getEmail(), user.getId())) {
+            throw new IllegalArgumentException("El email ya está registrado");
+        } else user.setEmail(request.getEmail());
 
         if (avatar == null) {
             // Borra imagen
@@ -61,7 +64,6 @@ public class UserService {
             String imageUrl = this.cloudinaryService.uploadImage(avatar);
             user.setAvatar(imageUrl);
         }
-
 
         UserEntity updated = userRepository.save(user);
 

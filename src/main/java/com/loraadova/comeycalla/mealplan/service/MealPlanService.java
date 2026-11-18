@@ -1,6 +1,6 @@
 package com.loraadova.comeycalla.mealplan.service;
 
-import com.loraadova.comeycalla.auth.security.CurrenUserService;
+import com.loraadova.comeycalla.auth.security.CurrentUserService;
 import com.loraadova.comeycalla.mealplan.dto.*;
 import com.loraadova.comeycalla.mealplan.entity.*;
 import com.loraadova.comeycalla.mealplan.mapper.MealPlanMapper;
@@ -23,7 +23,7 @@ public class MealPlanService {
     private RecipeRepository recipeRepository;
 
     @Autowired
-    private CurrenUserService currenUserService;
+    private CurrentUserService currentUserService;
 
     @Autowired
     private MealPlanMapper mealPlanRecipeMapper;
@@ -83,7 +83,7 @@ public class MealPlanService {
         }
 
         mealPlan.setDays(days);
-        mealPlan.setUser(this.currenUserService.getCurrentUser());
+        mealPlan.setUser(this.currentUserService.getCurrentUser());
 
         MealPlanEntity savedMealPlan = this.mealPlanRepository.save(mealPlan);
 
@@ -133,7 +133,7 @@ public class MealPlanService {
     }
 
     private Long getCurrentUserId() {
-        return this.currenUserService.getCurrentUserId();
+        return this.currentUserService.getCurrentUserId();
     }
 
     @Transactional

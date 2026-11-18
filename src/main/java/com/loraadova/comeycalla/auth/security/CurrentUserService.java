@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CurrenUserService {
+public class CurrentUserService {
 
     @Autowired
     UserRepository userRepository;

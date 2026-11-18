@@ -1,6 +1,6 @@
 package com.loraadova.comeycalla.recipe.service;
 
-import com.loraadova.comeycalla.auth.security.CurrenUserService;
+import com.loraadova.comeycalla.auth.security.CurrentUserService;
 import com.loraadova.comeycalla.common.CloudinaryService;
 import com.loraadova.comeycalla.recipe.dto.RecipeRequest;
 import com.loraadova.comeycalla.recipe.dto.RecipeResponse;
@@ -28,7 +28,7 @@ import java.util.*;
 @Service
 public class RecipeService {
     @Autowired
-    CurrenUserService currenUserService;
+    CurrentUserService currentUserService;
 
     @Autowired
     RecipeRepository recipeRepository;
@@ -137,7 +137,7 @@ public class RecipeService {
     }
 
     private UserEntity getCurrentUser() {
-        return this.currenUserService.getCurrentUser();
+        return this.currentUserService.getCurrentUser();
     }
 
     private RecipeEntity findCurrentUserRecipe(Long id) {
